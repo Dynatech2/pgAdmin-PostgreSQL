@@ -25,7 +25,7 @@ Now you can verify that Nginx is running:
 ```
 systemctl status nginx
 ```
-<pre>
+<div>
 Output
 ● nginx.service - A high performance web server and a reverse proxy server
      Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
@@ -38,7 +38,7 @@ Output
      CGroup: /system.slice/nginx.service
              ├─9919 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
              └─9920 "nginx: worker process
-</pre>
+</div>
 Next you will add a custom server block with your domain and app server proxy.
 #### Step 2 — Configuring your Server Block
 It is recommended practice to create a custom configuration file for your new server block additions, instead of editing the default configuration directly. Create and open a new Nginx configuration file using nano or your preferred text editor:

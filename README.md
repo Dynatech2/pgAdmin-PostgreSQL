@@ -3,6 +3,7 @@
 
 ### Introduction
 A reverse proxy is the recommended method to expose an application server to the internet. Whether you are running a Node.js application in production or a minimal built-in web server with Flask, these application servers will often bind to localhost with a TCP port. This means by default, your application will only be accessible locally on the machine it resides on. While you can specify a different bind point to force access through the internet, these application servers are designed to be served from behind a reverse proxy in production environments. This provides security benefits in isolating the application server from direct internet access, the ability to centralize firewall protection, and a minimized attack plane for common threats such as denial of service attacks.
+
 From a client’s perspective, interacting with a reverse proxy is no different from interacting with the application server directly. It is functionally the same, and the client cannot tell the difference. A client requests a resource and then receives it, without any extra configuration required by the client.
 This tutorial will demonstrate how to set up a reverse proxy using Nginx, a popular web server and reverse proxy solution. You will install Nginx, configure it as a reverse proxy using the proxy_pass directive, and forward the appropriate headers from your client’s request. If you don’t have an application server on hand to test, you will optionally set up a test application with the WSGI server Gunicorn.
 ### Prerequisites
@@ -41,11 +42,11 @@ Output
 </pre>
 Next you will add a custom server block with your domain and app server proxy.
 #### Step 2 — Configuring your Server Block
-It is recommended practice to create a custom configuration file for your new server block additions, instead of editing the default configuration directly. Create and open a new Nginx configuration file using nano or your preferred text editor:
+1. It is recommended practice to create a custom configuration file for your new server block additions, instead of editing the default configuration directly. Create and open a new Nginx configuration file using nano or your preferred text editor:
 ```
 sudo nano /etc/nginx/sites-available/your_domain
 ```
-Insert the following into your new file, making sure to replace your_domain and app_server_address. If you do not have an application server to test with, default to using http://127.0.0.1:8000 for the optional Gunicorn server setup in Step 3:
+2. Insert the following into your new file, making sure to replace your_domain and app_server_address. If you do not have an application server to test with, default to using http://127.0.0.1:8000 for the optional Gunicorn server setup in Step 3:
 ```
 /etc/nginx/sites-available/your_domain
 server {
@@ -60,8 +61,10 @@ server {
     }
 }
 ```
-Save and exit, with nano you can do this by hitting CTRL+O then CTRL+X.
+3. Save and exit, with nano you can do this by hitting CTRL+O then CTRL+X.
+
 This configuration file begins with a standard Nginx setup, where Nginx will listen on port 80 and respond to requests made to your_domain and www.your_domain. Reverse proxy functionality is enabled through Nginx’s proxy_pass directive. With this configuration, navigating to your_domain in your local web browser will be the same as opening app_server_address on your remote machine. While this tutorial will only proxy a single application server, Nginx is capable of serving as a proxy for multiple servers at once. By adding more location blocks as needed, a single server name can combine multiple application servers through proxy into one cohesive web application.
+
 All HTTP requests come with headers, which contain information about the client who sent the request. This includes details like IP address, cache preferences, cookie tracking, authorization status, and more. Nginx provides some recommended header forwarding settings you have included as proxy_params, and the details can be found in /etc/nginx/proxy_params:
 ```
 /etc/nginx/proxy_params
@@ -74,6 +77,7 @@ With reverse proxies, your goal is to pass on relevant information about the cli
 
 By default, when Nginx acts as a reverse proxy it alters two headers, strips out all empty headers, then passes on the request. The two altered headers are the Host and Connection header. There are many HTTP headers available, and you can check this detailed list of HTTP headers for more information on each of their purposes, though the relevant ones for reverse proxies will be covered here later.
 Here are the headers forwarded by proxy_params and the variables it stores the data in:
+
 - Host: This header contains the original host requested by the client, which is the website domain and port. Nginx keeps this in the $http_host variable.
 - X-Forwarded-For: This header contains the IP address of the client who sent the original request. It can also contain a list of IP addresses, with the original client IP coming first, then a list of all the IP addresses of the reverse proxy servers that passed the request through. Nginx keeps this in the $proxy_add_x_forwarded_for variable.
 - X-Real-IP: This header always contains a single IP address that belongs to the remote client. This is in contrast to the similar X-Forwarded-For which can contain a list of addresses. If X-Forwarded-For is not present, it will be the same as X-Real-IP.
@@ -131,32 +135,34 @@ Open your web browser and navigate to the domain you set up with Nginx:
 your_domain
 ```
 Your Nginx reverse proxy is now serving your Gunicorn web application server, displaying “Hello World!”.
-Conclusion
+### Conclusion
 With this tutorial you have configured Nginx as a reverse proxy to enable access to your application servers that would otherwise only be available locally. Additionally, you configured the forwarding of request headers, passing on the client’s header information.
 For examples of a complete solution using Nginx as a reverse proxy, check out how to serve Flask applications with Gunicorn and Nginx on Ubuntu 22.04 or how to run a Meilisearch frontend using InstantSearch on Ubuntu 22.04.
-How To Install and Use PostgreSQL on Ubuntu 22.04
-Introduction
+
+## How To Install and Use PostgreSQL on Ubuntu 22.04
+### Introduction
 Relational database management systems are a key component of many web sites and applications. They provide a structured way to store, organize, and access information.
 PostgreSQL, or Postgres, is a relational database management system that provides an implementation of the SQL querying language. It’s standards-compliant and has many advanced features like reliable transactions and concurrency without read locks.
+
 This guide demonstrates how to install Postgres on an Ubuntu 22.04 server. It also provides some instructions for general database administration.
-Prerequisites
+#### Prerequisites
 To follow along with this tutorial, you will need one Ubuntu 22.04 server that has been configured by following our Initial Server Setup for Ubuntu 22.04 guide. After completing this prerequisite tutorial, your server should have a non-root user with sudo permissions and a basic firewall.
-Step 1 — Installing PostgreSQL
+#### Step 1 — Installing PostgreSQL
 Ubuntu’s default repositories contain Postgres packages, so you can install these using the apt packaging system.
 If you’ve not done so recently, refresh your server’s local package index:
+```
 sudo apt update
-
-
+```
 Then, install the Postgres package along with a -contrib package that adds some extra utilities and functionality:
+```
 sudo apt install postgresql postgresql-contrib
-
-
+```
 Ensure that the server is running using the systemctl start command:
+```
 sudo systemctl start postgresql.service
-
-
+```
 Now that the software is installed and running, we can go over how it works and how it may be different from other relational database management systems you may have used.
-Step 2 — Using PostgreSQL Roles and Databases
+#### Step 2 — Using PostgreSQL Roles and Databases
 By default, Postgres uses a concept called roles to handle authentication and authorization. These are, in some ways, similar to regular Unix-style accounts, but Postgres does not distinguish between users and groups and instead prefers the more flexible term “role”.
 Upon installation, Postgres is set up to use peer authentication, meaning that it associates Postgres roles with a matching Unix/Linux system account. If a role exists within Postgres, a Unix/Linux username with the same name is able to sign in as that role.
 The installation procedure created a user account called postgres that is associated with the default Postgres role. In order to use Postgres, you can log into that account.

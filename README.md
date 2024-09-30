@@ -1,34 +1,31 @@
 # pgAdmin-PostgreSQL
-How To Configure Nginx as a Reverse Proxy on Ubuntu 22.04
+## How To Configure Nginx as a Reverse Proxy on Ubuntu 22.04
 
-Introduction
+### Introduction
 A reverse proxy is the recommended method to expose an application server to the internet. Whether you are running a Node.js application in production or a minimal built-in web server with Flask, these application servers will often bind to localhost with a TCP port. This means by default, your application will only be accessible locally on the machine it resides on. While you can specify a different bind point to force access through the internet, these application servers are designed to be served from behind a reverse proxy in production environments. This provides security benefits in isolating the application server from direct internet access, the ability to centralize firewall protection, and a minimized attack plane for common threats such as denial of service attacks.
 From a client’s perspective, interacting with a reverse proxy is no different from interacting with the application server directly. It is functionally the same, and the client cannot tell the difference. A client requests a resource and then receives it, without any extra configuration required by the client.
 This tutorial will demonstrate how to set up a reverse proxy using Nginx, a popular web server and reverse proxy solution. You will install Nginx, configure it as a reverse proxy using the proxy_pass directive, and forward the appropriate headers from your client’s request. If you don’t have an application server on hand to test, you will optionally set up a test application with the WSGI server Gunicorn.
-Prerequisites
+### Prerequisites
 To complete this tutorial, you will need:
 An Ubuntu 22.04 server, set up according to our initial server setup guide for Ubuntu 22.04,
 The address of the application server you want to proxy, this will be referred to as app_server_address throughout the tutorial. This can be an IP address with TCP port (such as the Gunicorn default of http://127.0.0.1:8000), or a unix domain socket (such as http://unix:/tmp/pgadmin4.sock for pgAdmin). If you do not have an application server set up to test with, you will be guided through setting up a Gunicorn application which will bind to http://127.0.0.1:8000.
 A domain name pointed at your server’s public IP. This will be configured with Nginx to proxy your application server.
-Step 1 — Installing Nginx
+#### Step 1 — Installing Nginx
 Nginx is available for installation with apt through the default repositories. Update your repository index, then install Nginx:
+```
 sudo apt update
 sudo apt install nginx
-
-
-Press Y to confirm the installation. If you are asked to restart services, press ENTER to accept the defaults.
+```
+Press **Y** to confirm the installation. If you are asked to restart services, press **ENTER** to accept the defaults.
 You need to allow access to Nginx through your firewall. Having set up your server according to the initial server prerequisites, add the following rule with ufw:
-
-
+```
 sudo ufw allow 'Nginx HTTP'
-
-
-
-
+```
 Now you can verify that Nginx is running:
+```
 systemctl status nginx
-
-
+```
+<pre>
 Output
 ● nginx.service - A high performance web server and a reverse proxy server
      Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
@@ -41,8 +38,9 @@ Output
      CGroup: /system.slice/nginx.service
              ├─9919 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
              └─9920 "nginx: worker process
+</pre>
 Next you will add a custom server block with your domain and app server proxy.
-Step 2 — Configuring your Server Block
+#### Step 2 — Configuring your Server Block
 It is recommended practice to create a custom configuration file for your new server block additions, instead of editing the default configuration directly. Create and open a new Nginx configuration file using nano or your preferred text editor:
 sudo nano /etc/nginx/sites-available/your_domain
 

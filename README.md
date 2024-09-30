@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/cac6b038-7a82-4cc9-992a-10d63204b90c)
+
 # pgAdmin-PostgreSQL
 ## How To Configure Nginx as a Reverse Proxy on Ubuntu 22.04
 

@@ -117,15 +117,19 @@ Now start your Gunicorn server, specifying the test Python module and the app fu
 ```
 gunicorn --workers=2 test:app
 ```
+```
 Output
 [2022-08-29 07:09:29 +0000] [10568] [INFO] Starting gunicorn 20.1.0
 [2022-08-29 07:09:29 +0000] [10568] [INFO] Listening at: http://127.0.0.1:8000 (10568)
 [2022-08-29 07:09:29 +0000] [10568] [INFO] Using worker: sync
 [2022-08-29 07:09:29 +0000] [10569] [INFO] Booting worker with pid: 10569
 [2022-08-29 07:09:29 +0000] [10570] [INFO] Booting worker with pid: 10570
+```
 The output confirms that Gunicorn is listening at the default address of http://127.0.0.1:8000. This is the address that you set up previously in your Nginx configuration to proxy. If not, go back to your /etc/nginx/sites-available/your_domain file and edit the app_server_address associated with the proxy_pass directive.
 Open your web browser and navigate to the domain you set up with Nginx:
+```
 your_domain
+```
 Your Nginx reverse proxy is now serving your Gunicorn web application server, displaying “Hello World!”.
 Conclusion
 With this tutorial you have configured Nginx as a reverse proxy to enable access to your application servers that would otherwise only be available locally. Additionally, you configured the forwarding of request headers, passing on the client’s header information.

@@ -169,97 +169,109 @@ The installation procedure created a user account called postgres that is associ
 There are a few ways to use this account to access Postgres.
 Switching Over to the postgres Account
 Switch over to the postgres account on your server by typing:
+```
 sudo -i -u postgres
-
-
+```
 You can now access the PostgreSQL prompt immediately by typing:
+```
 psql
-
-
+```
 From there you are free to interact with the database management system as necessary.
 Exit out of the PostgreSQL prompt by typing:
+```
 \q
-
-
+```
 This will bring you back to the postgres Linux user’s command prompt.
 Accessing a Postgres Prompt Without Switching Accounts
 You can also run the command you’d like with the postgres account directly with sudo.
 For instance, in the last example, you were instructed to get to the Postgres prompt by first switching to the postgres user and then running psql to open the Postgres prompt. You could do this in one step by running the single command psql as the postgres user with sudo, like this:
+```
 sudo -u postgres psql
-
-
+```
 This will log you directly into Postgres without the intermediary bash shell in between.
 Again, you can exit the interactive Postgres session by typing:
+```
 \q
-
-
+```
 Many use cases require more than one Postgres role. Read on to learn how to configure these.
-Step 3 — Creating a New Role
+#### Step 3 — Creating a New Role
 Currently, you have the postgres role configured within the database. You can create new roles from the command line with the createuser command. The --interactive flag will prompt you for the name of the new role and also ask whether it should have superuser permissions.
 If you are logged in as the postgres account, you can create a new user by typing:
+```
 createuser --interactive
-
+```
 
 If, instead, you prefer to use sudo for each command without switching from your normal account, type:
+```
 sudo -u postgres createuser --interactive
-Copy
+```
 The script will prompt you with some choices and, based on your responses, execute the correct Postgres commands to create a user to your specifications.
+```
 Output
 Enter name of role to add: sammy
 Shall the new role be a superuser? (y/n) y
+```
 You can get more control by passing some additional flags. Check out the options by looking at the man page for the createuser command:
+```
 man createuser
-
-
+```
 Your installation of Postgres now has a new user, but you have not yet added any databases. The next section describes this process.
-Step 4 — Creating a New Database
+#### Step 4 — Creating a New Database
 Another assumption that the Postgres authentication system makes by default is that for any role used to log in, that role will have a database with the same name which it can access.
 This means that if the user you created in the last section is called sammy, that role will attempt to connect to a database also called “sammy” by default. You can create the appropriate database with the createdb command.
 If you are logged in as the postgres account, you would type something like:
+```
 createdb sammy
-
-
+```
 If, instead, you prefer to use sudo for each command without switching from your normal account, you would type:
+```
 sudo -u postgres createdb sammy
-
+```
 
 This flexibility provides multiple paths for creating databases as needed.
-Step 5 — Opening a Postgres Prompt with the New Role
+#### Step 5 — Opening a Postgres Prompt with the New Role
 To log in with peer authentication, you’ll need a Linux user with the same name as your Postgres role and database.
 If you don’t have a matching Linux user available, you can create one with the adduser command. You will have to do this from your non-root account with sudo privileges (meaning, not logged in as the postgres user):
+```
 sudo adduser sammy
-
-
+```
 Once this new account is available, you can either switch over and connect to the database by typing:
+```
 sudo -i -u sammy
 psql
-
-
+```
 Or, you can do this inline:
+```
 sudo -u sammy psql
-
-
+```
 This command will log you in automatically, assuming that all of the components have been properly configured.
 If you want your user to connect to a different database, you can do so by specifying the database like this:
+```
 psql -d postgres
+```
 Once logged in, you can get check your current connection information by typing:
+```
 \conninfo
-
-
+```
 Output
+```
 You are connected to database "sammy" as user "sammy" via socket in "/var/run/postgresql" at port "5432".
+```
 This is useful if you are connecting to non-default databases or with non-default users.
-Step 6 — Creating and Deleting Tables
+#### Step 6 — Creating and Deleting Tables
 Now that you know how to connect to the PostgreSQL database system, you can learn some basic Postgres management tasks.
 The basic syntax for creating tables is as follows:
+```
 CREATE TABLE table_name (
     column_name1 col_type (field_length) column_constraints,
     column_name2 col_type (field_length),
     column_name3 col_type (field_length)
 );
+```
 This command gives the table a name, and then defines the columns as well as the column type and the max length of the field data. Optionally, you can add constraints for each column.
 You can learn more about creating tables by following our guide on How To Create and Manage Tables in SQL.
 For demonstration purposes, create the following table:
+```
 CREATE TABLE playground (
    equip_id serial PRIMARY KEY,
    type varchar (50) NOT NULL,
@@ -267,45 +279,45 @@ CREATE TABLE playground (
    location varchar(25) check (location in ('north', 'south', 'west', 'east', 'northeast', 'southeast', 'southwest', 'northwest')),
    install_date date
 );
-
-
+```
 This command will create a table that inventories playground equipment. The first column in the table will hold equipment ID numbers of the serial type, which is an auto-incrementing integer. This column also has the constraint of PRIMARY KEY which means that the values within it must be unique and not null.
 The next two lines create columns for the equipment type and color respectively, neither of which can be null. The line after these creates a location column with a constraint that requires the value to be one of eight possible values. The last line creates a date column that records the date on which you installed the equipment.
 For two of the columns (equip_id and install_date), the command doesn’t specify a field length. The reason for this is that some data types don’t require a set length because the length or format is implied.
 Examine your new table by typing:
+```
 \d
+```
+##### List of relations                                
+| Schema |          Name           |   Type   | Owner |
+|--------|-------------------------|----------|-------|
+| public | playground              | table    | sammy |
+| public | playground_equip_id_seq | sequence | sammy |
 
-
-Output
-                 List of relations
- Schema |          Name           |   Type   | Owner 
---------+-------------------------+----------+-------
- public | playground              | table    | sammy
- public | playground_equip_id_seq | sequence | sammy
-(2 rows)
 Your playground table is here, but there’s also something called playground_equip_id_seq that is of the type sequence. This is a representation of the serial type which you gave your equip_id column. This keeps track of the next number in the sequence and is created automatically for columns of this type.
 If you want to view just the table without the sequence, you can type:
+```
 \dt
+```
 
+##### List of relations
 
-Output
-         List of relations
- Schema |    Name    | Type  | Owner 
---------+------------+-------+-------
- public | playground | table | sammy
-(1 row)
+| Schema |    Name    | Type  | Owner |
+|--------|------------|-------|-------|
+| public | playground | table | sammy |
+
 With a table at the ready, let’s use it to practice managing data.
-Step 7 — Adding, Querying, and Deleting Data in a Table
+#### Step 7 — Adding, Querying, and Deleting Data in a Table
 Now that you have a table, you can insert some data into it. As an example, add a slide and a swing by calling the table you want to add to, naming the columns and then providing data for each column, like this:
+```
 INSERT INTO playground (type, color, location, install_date) VALUES ('slide', 'blue', 'south', '2017-04-28');
 INSERT INTO playground (type, color, location, install_date) VALUES ('swing', 'yellow', 'northwest', '2018-08-16');
-
-
+```
 You should take care when entering the data to avoid a few common hangups. For one, do not wrap the column names in quotation marks, but the column values that you enter do need quotes.
 Another thing to keep in mind is that you do not enter a value for the equip_id column. This is because this is automatically generated whenever you add a new row to the table.
 Retrieve the information you’ve added by typing:
+```
 SELECT * FROM playground;
-
+```
 
 Output
 equip_id | type  | color  | location  | install_date 
@@ -315,27 +327,32 @@ equip_id | type  | color  | location  | install_date
 (2 rows)
 Notice that your equip_id has been filled in successfully and that all of your other data has been organized correctly.
 If the slide on the playground breaks and you have to remove it, you can also remove the row from your table by typing:
+```
 DELETE FROM playground WHERE type = 'slide';
-
+```
 
 Query the table again:
+```
 SELECT * FROM playground;
-
+```
 
 Output
 equip_id | type  | color  | location  | install_date 
 ----------+-------+--------+-----------+--------------
         2 | swing | yellow | northwest | 2018-08-16
 (1 row)
-Notice that the slide row is no longer a part of the table.
-Step 8 — Adding and Deleting Columns from a Table
-After creating a table, you can modify it by adding or removing columns. Add a column to show the last maintenance visit for each piece of equipment by typing:
-ALTER TABLE playground ADD last_maint date;
 
+Notice that the slide row is no longer a part of the table.
+#### Step 8 — Adding and Deleting Columns from a Table
+After creating a table, you can modify it by adding or removing columns. Add a column to show the last maintenance visit for each piece of equipment by typing:
+```
+ALTER TABLE playground ADD last_maint date;
+```
 
 View your table information again. A new column has been added but no data has been entered:
+```
 SELECT * FROM playground;
-
+```
 
 Output
 equip_id | type  | color  | location  | install_date | last_maint 
@@ -343,96 +360,111 @@ equip_id | type  | color  | location  | install_date | last_maint
         2 | swing | yellow | northwest | 2018-08-16   | 
 (1 row)
 If you find that your work crew uses a separate tool to keep track of maintenance history, you can delete of the column by typing:
+```
 ALTER TABLE playground DROP last_maint;
-
-
+```
 This deletes the last_maint column and any values found within it, but leaves all the other data intact.
-Step 9 — Updating Data in a Table
+#### Step 9 — Updating Data in a Table
 So far, you’ve learned how to add records to a table and how to delete them, but this tutorial hasn’t yet covered how to modify existing entries.
 You can update the values of an existing entry by querying for the record you want and setting the column to the value you wish to use. You can query for the swing record (this will match every swing in your table) and change its color to red. This could be useful if you gave the swing set a paint job:
+```
 UPDATE playground SET color = 'red' WHERE type = 'swing';
-Copy
+```
 You can verify that the operation was successful by querying the data again:
+```
 SELECT * FROM playground;
-Copy
+```
+
 Output
 equip_id | type  | color | location  | install_date 
 ----------+-------+-------+-----------+--------------
         2 | swing | red   | northwest | 2018-08-16
 (1 row)
 The slide is now registered as being red.
-Conclusion
+### Conclusion
 You are now set up with PostgreSQL on your Ubuntu 22.04 server. If you’d like to learn more about Postgres and how to use it, we encourage you to check out the following guides:
 A comparison of relational database management systems
 Practice running queries with SQL
 
-How To Install And Configure pgAdmin 4 in Server Mode on Ubuntu 22.04
-Introduction
+## How To Install And Configure pgAdmin 4 in Server Mode on Ubuntu 22.04
+### Introduction
 pgAdmin is an open-source administration and development platform for PostgreSQL and its related database management systems. Written in Python and jQuery, it supports all the features found in PostgreSQL. You can use pgAdmin to do everything from writing basic SQL queries to monitoring your databases and configuring advanced database architectures.
+
 In this tutorial, we’ll walk through the process of installing and configuring the latest version of pgAdmin onto an Ubuntu 22.04 server, accessing pgAdmin through a web browser, and connecting it to a PostgreSQL database on your server.
-Prerequisites
+### Prerequisites
 To complete this tutorial, you will need:
+
 A server running Ubuntu 22.04. This server should have a non-root user with sudo privileges, as well as a firewall configured with ufw. For help with setting this up, follow our Initial Server Setup Guide for Ubuntu 22.04.
 Nginx installed and configured as a reverse proxy for http://unix:/tmp/pgadmin4.sock, following Step 1 and 2 of How To Configure Nginx as a Reverse Proxy on Ubuntu 22.04.
 PostgreSQL installed on your server. You can set this up by following our guide on How To Install and Use PostgreSQL on Ubuntu 22.04. As you follow this guide, be sure to create a new role and database, as you will need both to connect pgAdmin to your PostgreSQL instance.
 Python 3 and venv installed on your server. Follow How To Install Python 3 and Set Up a Programming Environment on an Ubuntu 22.04 server to install these tools and set up a virtual environment.
-Step 1 — Installing pgAdmin and its Dependencies
+#### Step 1 — Installing pgAdmin and its Dependencies
 As of this writing, the most recent version of pgAdmin is pgAdmin 4, while the most recent version available through the official Ubuntu repositories is pgAdmin 3. pgAdmin 3 is no longer supported though, and the project maintainers recommend installing pgAdmin 4. In this step, we will go over the process of installing the latest version of pgAdmin 4 within a virtual environment (as recommended by the project’s development team) and installing its dependencies using apt.
 To begin, update your server’s package index if you haven’t done so recently:
+```
 sudo apt update
-
+```
 
 Next, install the following dependencies. These include libgmp3-dev, a multiprecision arithmetic library; libpq-dev, which includes header files and a static library that helps communication with a PostgreSQL backend:
+```
 sudo apt install libgmp3-dev libpq-dev
-
+```
 
 Following this, create a few directories where pgAdmin will store its sessions data, storage data, and logs:
+```
 sudo mkdir -p /var/lib/pgadmin4/sessions
 sudo mkdir /var/lib/pgadmin4/storage
 sudo mkdir /var/log/pgadmin4
-
+```
 
 Then, change ownership of these directories to your non-root user and group. This is necessary because they are currently owned by your root user, but we will install pgAdmin from a virtual environment owned by your non-root user, and the installation process involves creating some files within these directories. After the installation, however, we will change the ownership over to the www-data user and group so it can be served to the web:
+```
 sudo chown -R sammy:sammy /var/lib/pgadmin4
 sudo chown -R sammy:sammy /var/log/pgadmin4
-
+```
 
 Next, open up your virtual environment. Navigate to the directory your programming environment is in and activate it. Following the naming conventions of the prerequisite Python 3 tutorial, we’ll go to the environments directory and activate the my_env environment:
+```
 cd environments/
 source my_env/bin/activate
-
+```
 
 After activating the virtual environment, it would be prudent to ensure that you have the latest version of pip installed on your system. To upgrade pip to the latest version, run the following command:
+```
 python -m pip install -U pip
 Use pip to install pgadmin4:
 python -m pip install pgadmin4==6.10
-
+```
 
 Next, install Gunicorn, a Python WSGI server that will be used with Nginx to serve the pgadmin web interface later in the tutorial:
+```
 python -m pip install gunicorn
-
-
+```
 That takes care of installing pgAdmin and its dependencies. Before connecting it to your database, though, there are a few changes you’ll need to make to the program’s configuration.
-Step 2 — Configuring pgAdmin 4
+### Step 2 — Configuring pgAdmin 4
 Although pgAdmin has been installed on your server, there are still a few steps you must go through to ensure it has the permissions and configurations needed to allow it to correctly serve the web interface.
 pgAdmin’s main configuration file, config.py, is read before any other configuration file. Its contents can be used as a reference point for further configuration settings that can be specified in pgAdmin’s other config files, but to avoid unforeseen errors, you should not edit the config.py file itself. We will add some configuration changes to a new file, named config_local.py, which will be read after the primary one.
 Create this file now using your preferred text editor. Here, we will use nano:
+```
 nano my_env/lib/python3.10/site-packages/pgadmin4/config_local.py
-
-
+```
 In your editor, add the following content:
+```bash
 environments/my_env/lib/python3.10/site-packages/pgadmin4/config_local.py
 LOG_FILE = '/var/log/pgadmin4/pgadmin4.log'
 SQLITE_PATH = '/var/lib/pgadmin4/pgadmin4.db'
 SESSION_DB_PATH = '/var/lib/pgadmin4/sessions'
 STORAGE_DIR = '/var/lib/pgadmin4/storage'
 SERVER_MODE = True
+```
 Here are what these five directives do:
+```ruby
 LOG_FILE: this defines the file in which pgAdmin’s logs will be stored.
 SQLITE_PATH: pgAdmin stores user-related data in an SQLite database, and this directive points the pgAdmin software to this configuration database. Because this file is located under the persistent directory /var/lib/pgadmin4/, your user data will not be lost after you upgrade.
 SESSION_DB_PATH: specifies which directory will be used to store session data.
 STORAGE_DIR: defines where pgAdmin will store other data, like backups and security certificates.
 SERVER_MODE: setting this directive to True tells pgAdmin to run in Server mode, as opposed to Desktop mode.
+```
 Notice that each of these file paths point to the directories you created in Step 1.
 After adding these lines, save and close the file. If you used nano, do so by press CTRL + X followed by Y and then ENTER.
 With those configurations in place, run the pgAdmin setup script to set your login credentials:

@@ -473,16 +473,18 @@ python my_env/lib/python3.10/site-packages/pgadmin4/setup.py
 
 After running this command, you will see a prompt asking for your email address and a password. These will serve as your login credentials when you access pgAdmin later on, so be sure to remember or take note of what you enter here:
 Output
-. . .
+```bash
 Enter the email address and password to use for the initial pgAdmin user account:
 
 Email address: sammy@example.com
 Password:
 Retype password:
+```
 With that, pgAdmin is fully configured. However, the program isn’t yet being served from your server, so it remains inaccessible. To resolve this, we will configure Gunicorn and Nginx to serve pgAdmin so you can access its user interface through a web browser.
-Step 3 — Starting Gunicorn and Configuring Nginx
+#### Step 3 — Starting Gunicorn and Configuring Nginx
 You will be using Gunicorn to serve pgAdmin as a web application. However, as an application server Gunicorn will only be available locally, and not accessible through the internet. To make it available remotely, you will need to use Nginx as a reverse proxy.
 Having completed the prerequisite to set up Nginx as a reverse proxy, your Nginx configuration file will contain this:
+```
 /etc/nginx/sites-available/your_domain
 
 
@@ -499,24 +501,27 @@ server {
 }
 This reverse proxy configuration enables your Gunicorn server to be accessible in your local browser. Start your Gunicorn server with the pgAdmin application:
 gunicorn --bind unix:/tmp/pgadmin4.sock --workers=1 --threads=25 --chdir ~/environments/my_env/lib/python3.10/site-packages/pgadmin4 pgAdmin4:app
-
-
+```
+```ruby
 Output
 [2022-08-29 00:19:11 +0000] [7134] [INFO] Starting gunicorn 20.1.0
 [2022-08-29 00:19:11 +0000] [7134] [INFO] Listening at: unix:/tmp/pgadmin4.sock (7134)
 [2022-08-29 00:19:11 +0000] [7134] [INFO] Using worker: gthread
 [2022-08-29 00:19:11 +0000] [7135] [INFO] Booting worker with pid: 7135
-Note: Invoking Gunicorn in this manner ties the process to your terminal. For a more long-term solution, invoke Gunicorn with a program like Supervisor. You can follow this tutorial on how to install and manage Supervisor on Ubuntu and Debian VPS.
+```
+**Note**: Invoking Gunicorn in this manner ties the process to your terminal. For a more long-term solution, invoke Gunicorn with a program like Supervisor. You can follow this tutorial on how to install and manage Supervisor on Ubuntu and Debian VPS.
 With Gunicorn acting as an application server made accessible by your Nginx reverse proxy, you are ready to access pgAdmin in your web browser.
-Step 4 — Accessing pgAdmin
+#### Step 4 — Accessing pgAdmin
 On your local machine, open up your preferred web browser and navigate to your server’s IP address:
+```
 http://your_domain
+```
 Once there, you’ll be presented with a login screen similar to the following:
 
 Enter the login credentials you defined in Step 2, and you’ll be taken to the pgAdmin Welcome Screen:
 
 Now that you’ve confirmed you can access the pgAdmin interface, all that’s left to do is to connect pgAdmin to your PostgreSQL database. Before doing so, though, you’ll need to make one minor change to your PostgreSQL superuser’s configuration.
-Step 5 — Configuring your PostgreSQL User
+#### Step 5 — Configuring your PostgreSQL User
 If you followed the prerequisite PostgreSQL tutorial, you should already have PostgreSQL installed on your server with a new superuser role and database set up.
 Next, go back to the pgAdmin 4 interface in your browser, and locate the Browser menu on the left hand side. Right-click on Servers to open a context menu, hover your mouse over Create, and click Server….
 
@@ -597,10 +602,11 @@ By this point, you’ve created a table and added a couple columns to it. Howeve
 
 This will open a new panel on the dashboard. At the top you’ll see a partially-completed INSERT statement, with the appropriate table and column names. Go ahead and replace the question marks (?) with some dummy data, being sure that the data you add aligns with the data types you selected for each column. Note that you can also add multiple rows of data by adding each row in a new set of parentheses, with each set of parentheses separated by a comma as shown in the following example.
 If you’d like, feel free to replace the partially-completed INSERT script with this example INSERT statement:
+```
 INSERT INTO public."table-01"(
     col1, col2, col3)
     VALUES ('Juneau', 14, 337), ('Bismark', 90, 2334), ('Lansing', 51, 556);
-
+```
 
 Click on the sideways triangle icon (▶) to execute the INSERT statement. Note that in older versions of pgAdmin, the execute icon is instead a lightning bolt (⚡).
 To view the table and all the data within it, right-click the name of your table in the Browser menu once again, hover your cursor over View/Edit Data, and select All Rows.

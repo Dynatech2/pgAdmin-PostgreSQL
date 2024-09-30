@@ -519,6 +519,7 @@ On your local machine, open up your preferred web browser and navigate to your s
 http://your_domain
 ```
 Once there, you’ll be presented with a login screen similar to the following:
+![image](https://github.com/user-attachments/assets/295c5a1b-9bb9-47c5-80d8-341413eed6ff)
 
 Enter the login credentials you defined in Step 2, and you’ll be taken to the pgAdmin Welcome Screen:
 
